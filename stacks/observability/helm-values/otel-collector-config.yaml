@@ -18,7 +18,7 @@ processors:
 
 exporters:
   prometheusremotewrite:
-    endpoint: http://kube-prom-kube-prometheus-prometheus.observability.svc.cluster.local:9090/api/v1/write
+    endpoint: http://kube-prom-kube-prometheus-prometheus.observability.svc.cluster.local:9090/prometheus/api/v1/write
   otlp/tempo:
     endpoint: http://tempo.observability.svc.cluster.local:4317
     tls:

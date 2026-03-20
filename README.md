@@ -293,7 +293,7 @@ Code → Lint → SAST → Tests → SonarCloud → Build → Trivy → Push →
 
 ![workflowIac](.attachments/workflows-iac.png)
 
-3. 
+3. Worflow App
 
 ![workflowAap](.attachments/workflows-app.png)
 
@@ -317,3 +317,4 @@ Code → Lint → SAST → Tests → SonarCloud → Build → Trivy → Push →
 {"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
 {"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}% 
 ~~~
+

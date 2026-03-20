@@ -46,44 +46,32 @@ resource "grafana_rule_group" "http_alerts" {
     condition = "C"
 
     data {
-      ref_id         = "A"
-      datasource_uid = "prometheus"
+      ref_id = "A"
 
       relative_time_range {
-        from = 300
+        from = 600
         to   = 0
       }
 
-      model = jsonencode({
-        expr    = "rate(http_requests_total{http_status_code=\"401\"}[5m])"
-        refId   = "A"
-      })
+      datasource_uid = "prometheus"
+      model          = "{\"editorMode\":\"code\",\"expr\":\"rate(http_requests_total{http_status_code=\\\"401\\\"}[5m])\",\"instant\":true,\"intervalMs\":1000,\"legendFormat\":\"__auto\",\"maxDataPoints\":43200,\"range\":false,\"refId\":\"A\"}"
     }
 
     data {
-      ref_id         = "C"
-      datasource_uid = "-100"
+      ref_id = "C"
 
       relative_time_range {
         from = 0
         to   = 0
       }
 
-      model = jsonencode({
-        type       = "threshold"
-        refId      = "C"
-        conditions = [{
-          type = "query"
-          evaluator = {
-            type   = "gt"
-            params = [0]
-          }
-          operator = { type = "and" }
-          query    = { params = ["A"] }
-          reducer  = { type = "last" }
-        }]
-      })
+      datasource_uid = "__expr__"
+      model          = "{\"conditions\":[{\"evaluator\":{\"params\":[0],\"type\":\"gt\"},\"operator\":{\"type\":\"and\"},\"query\":{\"params\":[]},\"reducer\":{\"params\":[],\"type\":\"last\"},\"type\":\"query\"}],\"datasource\":{\"type\":\"__expr__\",\"uid\":\"__expr__\"},\"expression\":\"A\",\"intervalMs\":1000,\"maxDataPoints\":43200,\"refId\":\"C\",\"type\":\"threshold\"}"
     }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "1m"
 
     labels = {
       severity = "warning"
@@ -94,6 +82,7 @@ resource "grafana_rule_group" "http_alerts" {
       summary     = "HTTP 401 Unauthorized detected"
       description = "Unauthorized requests detected on app-ge"
     }
+
   }
 
   # Alert: HTTP 404 Not Found
@@ -102,44 +91,32 @@ resource "grafana_rule_group" "http_alerts" {
     condition = "C"
 
     data {
-      ref_id         = "A"
-      datasource_uid = "prometheus"
+      ref_id = "A"
 
       relative_time_range {
-        from = 300
+        from = 600
         to   = 0
       }
 
-      model = jsonencode({
-        expr  = "rate(http_requests_total{http_status_code=\"404\"}[5m])"
-        refId = "A"
-      })
+      datasource_uid = "prometheus"
+      model          = "{\"editorMode\":\"code\",\"expr\":\"rate(http_requests_total{http_status_code=\\\"404\\\"}[5m])\",\"instant\":true,\"intervalMs\":1000,\"legendFormat\":\"__auto\",\"maxDataPoints\":43200,\"range\":false,\"refId\":\"A\"}"
     }
 
     data {
-      ref_id         = "C"
-      datasource_uid = "-100"
+      ref_id = "C"
 
       relative_time_range {
         from = 0
         to   = 0
       }
 
-      model = jsonencode({
-        type       = "threshold"
-        refId      = "C"
-        conditions = [{
-          type = "query"
-          evaluator = {
-            type   = "gt"
-            params = [5]
-          }
-          operator = { type = "and" }
-          query    = { params = ["A"] }
-          reducer  = { type = "last" }
-        }]
-      })
+      datasource_uid = "__expr__"
+      model          = "{\"conditions\":[{\"evaluator\":{\"params\":[0],\"type\":\"gt\"},\"operator\":{\"type\":\"and\"},\"query\":{\"params\":[]},\"reducer\":{\"params\":[],\"type\":\"last\"},\"type\":\"query\"}],\"datasource\":{\"type\":\"__expr__\",\"uid\":\"__expr__\"},\"expression\":\"A\",\"intervalMs\":1000,\"maxDataPoints\":43200,\"refId\":\"C\",\"type\":\"threshold\"}"
     }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "1m"
 
     labels = {
       severity = "warning"
@@ -150,6 +127,7 @@ resource "grafana_rule_group" "http_alerts" {
       summary     = "High rate of HTTP 404 Not Found"
       description = "Elevated 404 error rate on app-ge"
     }
+
   }
 
   # Alert: Application Errors in Logs
@@ -158,44 +136,32 @@ resource "grafana_rule_group" "http_alerts" {
     condition = "C"
 
     data {
-      ref_id         = "A"
-      datasource_uid = "loki"
+      ref_id = "A"
 
       relative_time_range {
-        from = 300
+        from = 600
         to   = 0
       }
 
-      model = jsonencode({
-        expr  = "sum(count_over_time({namespace=\"app\"} |= \"ERROR\" [5m]))"
-        refId = "A"
-      })
+      datasource_uid = "loki"
+      model          = "{\"editorMode\":\"code\",\"expr\":\"sum(count_over_time({namespace=\\\"app\\\"} |= \\\"ERROR\\\" [5m]))\",\"instant\":true,\"intervalMs\":1000,\"legendFormat\":\"__auto\",\"maxDataPoints\":43200,\"range\":false,\"refId\":\"A\"}"
     }
 
     data {
-      ref_id         = "C"
-      datasource_uid = "-100"
+      ref_id = "C"
 
       relative_time_range {
         from = 0
         to   = 0
       }
 
-      model = jsonencode({
-        type       = "threshold"
-        refId      = "C"
-        conditions = [{
-          type = "query"
-          evaluator = {
-            type   = "gt"
-            params = [0]
-          }
-          operator = { type = "and" }
-          query    = { params = ["A"] }
-          reducer  = { type = "last" }
-        }]
-      })
+      datasource_uid = "__expr__"
+      model          = "{\"conditions\":[{\"evaluator\":{\"params\":[0],\"type\":\"gt\"},\"operator\":{\"type\":\"and\"},\"query\":{\"params\":[]},\"reducer\":{\"params\":[],\"type\":\"last\"},\"type\":\"query\"}],\"datasource\":{\"type\":\"__expr__\",\"uid\":\"__expr__\"},\"expression\":\"A\",\"intervalMs\":1000,\"maxDataPoints\":43200,\"refId\":\"C\",\"type\":\"threshold\"}"
     }
+
+    no_data_state  = "OK"
+    exec_err_state = "Error"
+    for            = "1m"
 
     labels = {
       severity = "critical"
@@ -206,5 +172,6 @@ resource "grafana_rule_group" "http_alerts" {
       summary     = "Application errors detected in logs"
       description = "Error logs detected in app namespace via Loki"
     }
+
   }
 }
