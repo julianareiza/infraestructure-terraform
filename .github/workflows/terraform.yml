@@ -76,9 +76,10 @@ jobs:
       - name: Setup Terraform
         run: |
           curl -fsSL https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip -o tf.zip
-          unzip -o tf.zip -d /usr/local/bin/
+          unzip -o tf.zip
           rm tf.zip
-          terraform --version
+          echo "$PWD" >> "$GITHUB_PATH"
+          ./terraform --version
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -128,9 +129,10 @@ jobs:
       - name: Setup Terraform
         run: |
           curl -fsSL https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip -o tf.zip
-          unzip -o tf.zip -d /usr/local/bin/
+          unzip -o tf.zip
           rm tf.zip
-          terraform --version
+          echo "$PWD" >> "$GITHUB_PATH"
+          ./terraform --version
 
       - name: Terraform Init
         run: terraform init
@@ -173,9 +175,10 @@ jobs:
       - name: Setup Terraform
         run: |
           curl -fsSL https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip -o tf.zip
-          unzip -o tf.zip -d /usr/local/bin/
+          unzip -o tf.zip
           rm tf.zip
-          terraform --version
+          echo "$PWD" >> "$GITHUB_PATH"
+          ./terraform --version
 
       - name: Terraform Init
         run: terraform init
