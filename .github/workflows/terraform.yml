@@ -1,0 +1,188 @@
+name: Terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: "Stack to deploy"
+        required: true
+        type: choice
+        options:
+          - eks
+          - observability
+          - grafana
+      action:
+        description: "Terraform action to run"
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+      workspace:
+        description: "Terraform workspace (environment)"
+        required: true
+        default: "development"
+        type: choice
+        options:
+          - development
+
+  push:
+    branches: [main]
+    paths:
+      - "modules/**"
+      - "stacks/**"
+
+jobs:
+  detect-changes:
+    name: Detect changed stacks
+    runs-on: arc-runner-set-infra
+    outputs:
+      eks: ${{ steps.changes.outputs.eks }}
+      observability: ${{ steps.changes.outputs.observability }}
+      grafana: ${{ steps.changes.outputs.grafana }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "${{ github.event.inputs.stack }}=true" >> "$GITHUB_OUTPUT"
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD)
+            echo "eks=$( echo "$CHANGED" | grep -qE '^(stacks/eks/|modules/eks/)' && echo true || echo false )" >> "$GITHUB_OUTPUT"
+            echo "observability=$( echo "$CHANGED" | grep -qE '^(stacks/observability/|modules/observability/)' && echo true || echo false )" >> "$GITHUB_OUTPUT"
+            echo "grafana=$( echo "$CHANGED" | grep -qE '^(stacks/grafana/|modules/grafana/)' && echo true || echo false )" >> "$GITHUB_OUTPUT"
+          fi
+
+  ###########################################################################
+  # EKS Stack (AWS)
+  ###########################################################################
+  eks:
+    name: EKS - ${{ github.event.inputs.action || 'plan' }}
+    needs: detect-changes
+    if: needs.detect-changes.outputs.eks == 'true'
+    runs-on: arc-runner-set-infra
+
+    defaults:
+      run:
+        working-directory: stacks/eks
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.5"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Select Workspace
+        run: terraform workspace select -or-create ${{ github.event.inputs.workspace || 'development' }}
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      # - name: Approval Gate
+      #   uses: trstringer/manual-approval@v1
+      #   with:
+      #     secret: ${{ secrets.GITHUB_TOKEN }}
+      #     approvers: julianareiza
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve tfplan
+
+  ###########################################################################
+  # Observability Stack (Kubernetes + Helm)
+  ###########################################################################
+  observability:
+    name: Observability - ${{ github.event.inputs.action || 'plan' }}
+    needs: detect-changes
+    if: needs.detect-changes.outputs.observability == 'true'
+    runs-on: arc-runner-set-infra
+
+    defaults:
+      run:
+        working-directory: stacks/observability
+
+    env:
+      TF_VAR_arc_github_token: ${{ secrets.GH_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.5"
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Select Workspace
+        run: terraform workspace select -or-create ${{ github.event.inputs.workspace || 'development' }}
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      # - name: Approval Gate
+      #   uses: trstringer/manual-approval@v1
+      #   with:
+      #     secret: ${{ secrets.GITHUB_TOKEN }}
+      #     approvers: julianareiza
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve tfplan
+
+  ###########################################################################
+  # Grafana Stack (Dashboards, Alerts, Folders)
+  ###########################################################################
+  grafana:
+    name: Grafana - ${{ github.event.inputs.action || 'plan' }}
+    needs: detect-changes
+    if: needs.detect-changes.outputs.grafana == 'true'
+    runs-on: arc-runner-set-infra
+
+    defaults:
+      run:
+        working-directory: stacks/grafana
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.5"
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Select Workspace
+        run: terraform workspace select -or-create ${{ github.event.inputs.workspace || 'development' }}
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      # - name: Approval Gate
+      #   uses: trstringer/manual-approval@v1
+      #   with:
+      #     secret: ${{ secrets.GITHUB_TOKEN }}
+      #     approvers: julianareiza
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve tfplan

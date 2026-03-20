@@ -1,0 +1,126 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-loki-alerts
+  namespace: observability
+  labels:
+    grafana_alert: "1"
+data:
+  loki-error-alert.json: |
+    {
+      "apiVersion": 1,
+      "groups": [
+        {
+          "orgId": 1,
+          "name": "app-ge-log-alerts",
+          "folder": "app-ge",
+          "interval": "1m",
+          "rules": [
+            {
+              "uid": "app-ge-log-errors",
+              "title": "Application Log Errors",
+              "condition": "C",
+              "data": [
+                {
+                  "refId": "A",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 300,
+                    "to": 0
+                  },
+                  "datasourceUid": "loki",
+                  "model": {
+                    "expr": "count_over_time({app=\"app-ge\"} |= \"ERROR\" [5m])",
+                    "refId": "A"
+                  }
+                },
+                {
+                  "refId": "B",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 300,
+                    "to": 0
+                  },
+                  "datasourceUid": "__expr__",
+                  "model": {
+                    "conditions": [
+                      {
+                        "evaluator": {
+                          "params": [],
+                          "type": "gt"
+                        },
+                        "operator": {
+                          "type": "and"
+                        },
+                        "query": {
+                          "params": ["B"]
+                        },
+                        "reducer": {
+                          "params": [],
+                          "type": "last"
+                        },
+                        "type": "query"
+                      }
+                    ],
+                    "datasource": {
+                      "type": "__expr__",
+                      "uid": "__expr__"
+                    },
+                    "expression": "A",
+                    "reducer": "last",
+                    "refId": "B",
+                    "type": "reduce"
+                  }
+                },
+                {
+                  "refId": "C",
+                  "queryType": "",
+                  "relativeTimeRange": {
+                    "from": 300,
+                    "to": 0
+                  },
+                  "datasourceUid": "__expr__",
+                  "model": {
+                    "conditions": [
+                      {
+                        "evaluator": {
+                          "params": [0],
+                          "type": "gt"
+                        },
+                        "operator": {
+                          "type": "and"
+                        },
+                        "query": {
+                          "params": ["C"]
+                        },
+                        "reducer": {
+                          "params": [],
+                          "type": "last"
+                        },
+                        "type": "query"
+                      }
+                    ],
+                    "datasource": {
+                      "type": "__expr__",
+                      "uid": "__expr__"
+                    },
+                    "expression": "B",
+                    "refId": "C",
+                    "type": "threshold"
+                  }
+                }
+              ],
+              "for": "1m",
+              "labels": {
+                "severity": "critical",
+                "app": "app-ge"
+              },
+              "annotations": {
+                "summary": "Errors detected in app-ge logs",
+                "description": "Application logs contain ERROR level entries in the last 5 minutes"
+              }
+            }
+          ]
+        }
+      ]
+    }

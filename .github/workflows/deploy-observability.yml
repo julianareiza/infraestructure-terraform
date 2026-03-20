@@ -1,0 +1,84 @@
+name: Deploy Observability Stack
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "helm-values/**"
+      - "k8s/otel-collector/**"
+
+env:
+  NAMESPACE: observability
+  # AWS_REGION: ${{ secrets.AWS_REGION }}
+  # EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+
+jobs:
+  deploy:
+    name: Deploy Observability
+    runs-on: arc-runner-set-infra
+    steps:
+      - uses: actions/checkout@v4
+
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ env.AWS_REGION }}
+
+      # - name: Update kubeconfig
+      #   run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Create namespace
+        run: kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Add Helm repos
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo update
+
+      - name: Install kube-prometheus-stack
+        run: |
+          helm upgrade --install kube-prom prometheus-community/kube-prometheus-stack \
+            -n ${{ env.NAMESPACE }} \
+            -f helm-values/kube-prometheus-stack.yml \
+            --wait --timeout 10m
+
+      - name: Install Loki
+        run: |
+          helm upgrade --install loki grafana/loki \
+            -n ${{ env.NAMESPACE }} \
+            -f helm-values/loki.yml \
+            --wait --timeout 10m
+
+      - name: Install Tempo
+        run: |
+          helm upgrade --install tempo grafana/tempo \
+            -n ${{ env.NAMESPACE }} \
+            -f helm-values/tempo.yml \
+            --wait --timeout 10m
+
+      - name: Install NGINX Ingress Controller
+        run: |
+          helm upgrade --install ingress-nginx ingress-nginx \
+            --repo https://kubernetes.github.io/ingress-nginx \
+            --namespace ingress-nginx \
+            --create-namespace \
+            --set controller.metrics.enabled=true \
+            --set controller.metrics.serviceMonitor.enabled=true
+
+      - name: Deploy OTel Collector
+        run: kubectl apply -f k8s/otel-collector/
+
+      - name: Wait for OTel Collector rollout
+        run: kubectl rollout status deployment/otel-collector -n ${{ env.NAMESPACE }} --timeout=120s
+
+      - name: Apply Grafana alert ConfigMaps
+        run: kubectl apply -f helm-values/grafana-alerts.yml
+
+      - name: Verify
+        run: |
+          kubectl get pods -n ${{ env.NAMESPACE }}
+          kubectl get svc -n ${{ env.NAMESPACE }}

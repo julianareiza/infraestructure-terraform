@@ -1,0 +1,12 @@
+{
+  "global_variables": {
+    "environment": "development"
+  },
+  "namespaces": ["app", "observability"],
+  "arc": {
+    "github_repos": {
+      "app": "https://github.com/julianareiza/app-ge",
+      "infra": "https://github.com/julianareiza/infraestructure-terraform"
+    }
+  }
+}

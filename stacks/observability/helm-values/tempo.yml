@@ -1,0 +1,25 @@
+tempo:
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+  retention: 72h
+
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:3100
+
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: http://kube-prom-kube-prometheus-prometheus.observability.svc.cluster.local:9090/api/v1/write
+
+persistence:
+  enabled: true
+  size: 10Gi

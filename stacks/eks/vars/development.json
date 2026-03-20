@@ -1,0 +1,43 @@
+{
+  "global_variables": {
+    "environment": "development",
+    "region": "us-east-1"
+  },
+  "eks": {
+    "cluster_name": "devsecops-dev",
+    "cluster_version": "1.31",
+    "vpc_name": "devsecops-dev-vpc",
+    "private_subnet_names": [
+      "devsecops-dev-private-us-east-1a",
+      "devsecops-dev-private-us-east-1b"
+    ],
+    "public_subnet_names": [
+      "devsecops-dev-public-us-east-1a",
+      "devsecops-dev-public-us-east-1b"
+    ],
+    "node_instance_types": ["t3.medium"],
+    "node_desired_size": 2,
+    "node_min_size": 1,
+    "node_max_size": 3,
+    "node_disk_size": 20,
+    "node_capacity_type": "ON_DEMAND",
+    "namespaces": ["app", "observability"],
+    "tags": {
+      "Project": "devsecops-ge",
+      "Owner": "julianareiza"
+    }
+  },
+  "arc": {
+    "github_repos": {
+      "app": "https://github.com/julianareiza/app-ge",
+      "infra": "https://github.com/julianareiza/infraestructure-terraform"
+    }
+  },
+  "ecr_repositories": {
+    "app-ge": {
+      "repository_name": "app-ge",
+      "scan_on_push": true,
+      "max_image_count": 10
+    }
+  }
+}
