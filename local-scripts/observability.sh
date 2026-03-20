@@ -30,3 +30,8 @@ helm upgrade --install ingress-nginx ingress-nginx \
   --create-namespace \
   --set controller.metrics.enabled=true \
   --set controller.metrics.serviceMonitor.enabled=true
+
+
+# por forward ingress
+kubectl port-forward svc/ingress-nginx-controller 8080:80 -n ingress-nginx 
+kubectl port-forward svc/kube-prom-grafana 3000:80 -n observability

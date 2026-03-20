@@ -103,7 +103,15 @@ resource "helm_release" "arc_runner_set" {
     containerMode = {
       type = "dind"
     }
+    template = {
+      spec = {
+        serviceAccountName = "arc-runner-sa-${each.key}"
+      }
+    }
   })]
 
-  depends_on = [helm_release.arc_controller]
+  depends_on = [
+    helm_release.arc_controller,
+    kubernetes_cluster_role_binding_v1.arc_runner,
+  ]
 }

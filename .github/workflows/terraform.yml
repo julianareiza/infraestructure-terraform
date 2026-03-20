@@ -164,6 +164,9 @@ jobs:
       run:
         working-directory: stacks/grafana
 
+    env:
+      TF_VAR_grafana_token: ${{ secrets.GRAFANA_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
 

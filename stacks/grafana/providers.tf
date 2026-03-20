@@ -9,7 +9,13 @@ terraform {
   }
 }
 
+variable "grafana_token" {
+  description = "Grafana Service Account token"
+  type        = string
+  sensitive   = true
+}
+
 provider "grafana" {
   url  = local.configs.grafana.url
-  auth = local.configs.grafana.auth
+  auth = var.grafana_token
 }

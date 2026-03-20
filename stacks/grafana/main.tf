@@ -6,6 +6,6 @@ module "grafana" {
   source = "../../modules/grafana"
 
   grafana_url     = local.configs.grafana.url
-  grafana_auth    = local.configs.grafana.auth
+  grafana_auth    = var.grafana_token
   dashboards_path = "${path.module}/dashboards"
 }

@@ -1,5 +1,14 @@
 prometheus:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - julian-areiza-el-mas-crack
+    path: /prometheus
+    pathType: Prefix
   prometheusSpec:
+    externalUrl: /prometheus
+    routePrefix: /prometheus
     enableRemoteWriteReceiver: true
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
@@ -7,6 +16,17 @@ prometheus:
 
 grafana:
   adminPassword: "admin"
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - julian-areiza-el-mas-crack
+    path: /grafana
+    pathType: Prefix
+  grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s/grafana"
+      serve_from_sub_path: true
   persistence:
     enabled: true
     size: 5Gi
