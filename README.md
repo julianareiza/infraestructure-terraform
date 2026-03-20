@@ -297,4 +297,23 @@ Code → Lint → SAST → Tests → SonarCloud → Build → Trivy → Push →
 
 ![workflowAap](.attachments/workflows-app.png)
 
-4. 
+4. Canary test: 
+![canary](.attachments/canary.png)
+
+~~~bash
+# Ejecuta el script ./loca-scripts/test-canary.sh 
+
+./loca-scripts/test-canary.sh      
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"canary","commit":"5510277ea379f76aeb5afe352039e205880a7937"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}
+{"version":"stable","commit":"9e3bee5adcb3ead8668095d60785ffce48febf28"}% 
+~~~
